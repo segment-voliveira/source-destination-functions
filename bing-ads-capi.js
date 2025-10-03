@@ -113,64 +113,6 @@ async function retrieveAuthToken(settings) {
 	return authToken;
 }
 
-async function retrieveProfileTraits(email) {
-	const endpointBaseUrl = 'https://profiles.segment.com/v1/spaces/'; //Base URL for profile API
-	const token =
-		'-j3BQbSp2';
-	const spaceId = 'spa_rjhaYFQ7uxNaoCosMhtEKv';
-	let url =
-		endpointBaseUrl +
-		spaceId +
-		'/collections/users/profiles/email:' +
-		email +
-		'/traits?include=msclkid&include=mSCLKID';
-
-	try {
-		const RESPONSE = await fetch(url, {
-			method: 'GET',
-			headers: {
-				Authorization: `Basic ${btoa(token + ':')}`,
-				'Content-Type': 'application/json'
-			},
-			body: null
-		});
-
-		// Handle retriable HTTP status codes
-		if (RESPONSE.status >= 500 || RESPONSE.status === 429) {
-			console.error(
-				`Retriable error when calling PAPI: HTTP ${RESPONSE.status}`
-			);
-			throw new RetryError(
-				`Retriable HTTP error when calling PAPI: ${RESPONSE.status}`
-			);
-		}
-
-		// Handle non-retriable HTTP errors
-		if (!RESPONSE.ok) {
-			console.error(
-				`Non-retriable HTTP error when calling PAPI: ${RESPONSE.status}`
-			);
-			throw new Error(
-				`Non-retriable HTTP error when calling PAPI: ${RESPONSE.status}`
-			);
-		}
-
-		responseFromProfile = await RESPONSE.json();
-
-		if (
-			responseFromProfile.traits?.mSCLKID ||
-			responseFromProfile.traits?.msclkid
-		) {
-			return responseFromProfile.traits.msclkid
-				? responseFromProfile.traits.msclkid
-				: responseFromProfile.traits.mSCLKID;
-		}
-		/*end collec}t data from profile*/
-	} catch (error) {
-		// Retry on connection error
-		throw new Error(error.message);
-	}
-}
 /**
  * Handle track event
  * @param  {SegmentTrackEvent} event
